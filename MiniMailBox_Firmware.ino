@@ -8,6 +8,8 @@ WiFiClient espClient;
 PubSubClient client(espClient);
 Servo flagServo; 
 
+#define PIN_SERVO  D8
+
 
 const char* mqtt_server_host = "io.adafruit.com";
 const int   mqtt_server_port = 1883;
@@ -90,12 +92,12 @@ void reconnect() {
   }
 }
 
-#define PIN_SERVO  D7
-
 void raiseUpFlag() {
   flagServo.attach(PIN_SERVO);
+  flagServo.write(150);
+  delay(250);
   flagServo.write(255);
-  delay(500);
+  delay(250);
   
   flagServo.detach();
 }
