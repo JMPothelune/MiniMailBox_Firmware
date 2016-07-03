@@ -1,15 +1,16 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
+#include <Servo.h>
 #include "config.h"
 
 
 WiFiClient espClient;
 PubSubClient client(espClient);
+Servo flagServo; 
 
 
 const char* mqtt_server_host = "io.adafruit.com";
 const int   mqtt_server_port = 1883;
-
 
 void setup() {
   Serial.begin(115200);
@@ -29,18 +30,6 @@ void loop() {
     reconnect();
   }
   client.loop();
-
-  
-  long now = millis();
-  if (now - lastMsg > 2000) {
-    lastMsg = now;
-    ++value;
-    snprintf (msg, 75, "hello world #%ld", value);
-    Serial.print("Publish message: ");
-    Serial.println(msg);
-    client.publish(status_topic, msg);
-  }
-  
 }
 
 
@@ -53,6 +42,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
   Serial.println();
 
+  raiseUpFlag();
   // TODO Protocol on message received
 }
 
@@ -87,7 +77,7 @@ void reconnect() {
     if (client.connect("MiniMailBox", mqtt_server_username, mqtt_server_password)) {
       Serial.println("connected");
       // Once connected, publish an announcement...
-      client.publish(status_topic, "connected");
+      //client.publish(status_topic, "connected");
       // ... and resubscribe
       client.subscribe(event_topic);
     } else {
@@ -99,3 +89,14 @@ void reconnect() {
     }
   }
 }
+
+#define PIN_SERVO  D7
+
+void raiseUpFlag() {
+  flagServo.attach(PIN_SERVO);
+  flagServo.write(255);
+  delay(500);
+  
+  flagServo.detach();
+}
+
